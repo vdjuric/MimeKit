@@ -8,7 +8,7 @@
     <Authors>Jeffrey Stedfast</Authors>
     <_LegacyFrameworks>net462;net47</_LegacyFrameworks>
     <_LegacyFrameworks Condition=" Exists('C:\Windows') ">$(_LegacyFrameworks);net48</_LegacyFrameworks>
-    <TargetFrameworks>$(_LegacyFrameworks);netstandard2.0;netstandard2.1;net6.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>MimeKit</AssemblyName>
     <PackageId>MimeKit</PackageId>
@@ -80,10 +80,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="Text\HtmlEntityDecoder.g.cs">
       <DependentUpon>HtmlEntityDecoder.cs</DependentUpon>
     </Compile>
@@ -95,6 +91,10 @@
     <Compile Remove="Cryptography\LdapUri.cs" />
     <Compile Remove="Utils\OptimizedOrdinalComparer.cs" />
     <Compile Include="Utils\OptimizedOrdinalComparer.cs" Condition=" $(TargetFramework.StartsWith('net4')) Or '$(TargetFramework)' == 'netstandard2.0' " />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\bc-csharp\crypto\src\BouncyCastle.Crypto.csproj" />
   </ItemGroup>
 
 </Project>
