@@ -399,7 +399,7 @@ namespace MimeKit.Cryptography {
 #endif
 		}
 
-		internal static void WriteHeaders (FormatOptions options, MimeMessage message, IList<string> fields, DkimCanonicalizationAlgorithm headerCanonicalizationAlgorithm, Stream stream)
+		internal static void WriteHeaders (FormatOptions options, MimeMessage message, IList<string> fields, DkimCanonicalizationAlgorithm headerCanonicalizationAlgorithm, Stream stream, Action<Header>? onHeaderSelected = null)
 		{
 			var counts = new Dictionary<string, int> (StringComparer.Ordinal);
 
@@ -429,6 +429,10 @@ namespace MimeKit.Cryptography {
 					continue;
 
 				var header = headers[index];
+
+				if (onHeaderSelected is not null) {
+					onHeaderSelected (header);
+				}
 
 				switch (headerCanonicalizationAlgorithm) {
 				case DkimCanonicalizationAlgorithm.Relaxed:
@@ -529,13 +533,13 @@ namespace MimeKit.Cryptography {
 		/// <param name="canonicalizationAlgorithm">The algorithm used to canonicalize the headers.</param>
 		/// <param name="signature">The expected signature of the headers encoded in base64.</param>
 		/// <returns><c>true</c> if the calculated signature matches <paramref name="signature"/>; otherwise, <c>false</c>.</returns>
-		protected bool VerifySignature (FormatOptions options, MimeMessage message, Header dkimSignature, DkimSignatureAlgorithm signatureAlgorithm, AsymmetricKeyParameter key, string[] headers, DkimCanonicalizationAlgorithm canonicalizationAlgorithm, string signature)
+		protected bool VerifySignature (FormatOptions options, MimeMessage message, Header dkimSignature, DkimSignatureAlgorithm signatureAlgorithm, AsymmetricKeyParameter key, string[] headers, DkimCanonicalizationAlgorithm canonicalizationAlgorithm, string signature, Action<Header>? onHeaderSelected = null)
 		{
 			using (var stream = new DkimSignatureStream (CreateVerifyContext (signatureAlgorithm, key))) {
 				using (var filtered = new FilteredStream (stream)) {
 					filtered.Add (options.CreateNewLineFilter ());
 
-					WriteHeaders (options, message, headers, canonicalizationAlgorithm, filtered);
+					WriteHeaders (options, message, headers, canonicalizationAlgorithm, filtered, onHeaderSelected);
 
 					// now include the DKIM-Signature header that we are verifying,
 					// but only after removing the "b=" signature value.
